@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time GPS with Kalman Filter</title>
+    <style>
+        body {
+            color:#303030;
+            font:100% 'Helvetica Neue',Helvetica,Verdana,Helvetica,Tahoma,Arial,sans-serif;
+            margin:0;
+        }
+        #map {
+            height: 500px;
+        }
+        .hidden{
+            display: none;
+        }
+        .zui-table {
+            border: solid 1px #DDEEEE;
+            border-collapse: collapse;
+            border-spacing: 0;
+            font: normal 13px Arial, sans-serif;
+            table-layout: fixed;
+            width:auto;
+        }
+        .zui-table thead th {
+            background-color: #DDEFEF;
+            border: solid 1px #DDEEEE;
+            color: #336B6B;
+            padding: 10px;
+            text-align: left;
+            text-shadow: 1px 1px 1px #fff;
+        }
+        .zui-table tbody td {
+            border: solid 1px #DDEEEE;
+            color: #333;
+            padding: 10px;
+            text-shadow: 1px 1px 1px #fff;
+        }
+        .controlTable{
+            table-layout: fixed;
+            width: 100%;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container body-content">
+    <div id="map"></div>
+    <table class="controlTable">
+        <tr>
+            <td>
+                <button id="control">Stop</button>
+            </td>
+            <td>
+                <button id="copy">Copy</button><br/>
+            </td>
+            <td>
+                <label for="displayKalman">Use Kalman</label><input type="checkbox" id ="displayKalman">
+            </td>
+            <td>
+                <label for="interval">Intv </label><input style='width:4em' type="number" id ="interval"/>
+            </td>
+            <td>
+                <label for="accuracy">Max Accu </label><input style='width:3em' type="number" id ="accuracy"/>
+            </td>
+        </tr>
+    </table>
+    <table id="resultTable" class="zui-table">
+        <tr>
+            <td>DateTime</td>
+            <td>Lat</td>
+            <td>Long</td>
+            <td>Accuracy</td>
+            <td>Distance</td>
+            <td>KMLat</td>
+            <td>KMLong</td>
+            <td>Sum</td>
+            <td>KMSum</td>
+        </tr>
+    </table>
+    <p id="clipboardContent" class="hidden"></p>
+</div>
+</body>
+<script src="./Scripts/kalman.js"></script>
+<script src="./Scripts/trackGPS.js"></script>
+</html>
