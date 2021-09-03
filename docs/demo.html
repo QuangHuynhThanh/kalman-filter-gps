@@ -42,13 +42,14 @@
             table-layout: fixed;
             width: 100%;
             padding: 10px;
+            background-color: #b4e8e8;
         }
     </style>
 </head>
 <body>
 <div class="container body-content">
     <div id="map"></div>
-    <table class="controlTable">
+    <table class="controlTable zui-table">
         <tr>
             <td>
                 <button id="control">Stop</button>
@@ -57,13 +58,16 @@
                 <button id="copy">Copy</button><br/>
             </td>
             <td>
-                <label for="displayKalman">Use Kalman</label><input type="checkbox" id ="displayKalman">
+                <label for="displayKalman">Kalman</label><input type="checkbox" id ="displayKalman">
             </td>
             <td>
-                <label for="interval">Intv </label><input style='width:4em' type="number" id ="interval"/>
+                <label for="snappedToRoad">Snapped</label><input type="checkbox" id ="snappedToRoad">
             </td>
             <td>
-                <label for="accuracy">Max Accu </label><input style='width:3em' type="number" id ="accuracy"/>
+                <label for="interval">Intv </label><input style='width:100%' type="number" id ="interval"/>
+            </td>
+            <td>
+                <label for="accuracy">Max Accu </label><input style='width:100%' type="number" id ="accuracy"/>
             </td>
         </tr>
     </table>
@@ -83,6 +87,10 @@
     <p id="clipboardContent" class="hidden"></p>
 </div>
 </body>
-<script src="./Scripts/kalman.js"></script>
+<script>
+    let ggKey ="AIzaSyDzDtz2OH5k5m-m9KmfqoID0B5TlRWRGt0";
+</script>
+<script src="https://www.gstatic.com/external_hosted/jquery2.min.js"></script>
+<script src="./Scripts/kalMan.js"></script>
 <script src="./Scripts/trackGPS.js"></script>
 </html>
