@@ -2,10 +2,17 @@ const config = {
     activityType: 1, //0-sitting,1 - walking, 2-hiking, 3-running, 4- biking, 
     timePeriod: 5000,
     timeOutGPS: 8000,
-    maxAllowAccuracy: 200, //depends on device & GPS signal strength. High-end phone has low Accuracy value.
-    apiKey: ggKey,//if you want to use SnapToRoad feature, enable it in GG Console
-    KalmanActivity: [0.1, 3, 2, 6, 11]
+    maxAllowAccuracy: 20, //depends on device & GPS signal strength. High-end phone has low Accuracy value.
+    apiKey: ggKey, //replace ggKey with "YOUR-API" string. If you want to use SnapToRoad feature, enable it in GG Console
+    mapId: "map",
+    showKalman: false,
+    snappedToRoad:false,
+    logOutput: function(outputs){
+        console.log(outputs.toString());
+        },//you can change to your preferred function to handle each time GPS value added.)
+    KalmanActivity: [0.1, 3, 2, 6, 11] // Kalman decay for each activity type. Change if you know what you're doing.
 }
+
 const runtime = {
     continueCollect: true,
     reCenter: true,
@@ -18,82 +25,18 @@ const runtime = {
     map: null,
     polylines: null,
     KalManFilter: null,
-    showKalman: false,
     pointDistances: [],
     pointKalManDistances: [],
     sumDistance: 0,
     sumKMDistance: 0,
-    contentL: null,
-    run: function run() {
+    run: function() {
         const head = document.getElementsByTagName('head')[0];
         const script = document.createElement('script');
         script.type = 'text/javascript';
         script.src = "https://maps.googleapis.com/maps/api/js?callback=initMap&key=" + config.apiKey;
         head.appendChild(script);
-    }()
-}
-const ui = {
-    setup: function() {
-        this.controlButton = document.getElementById("control");
-        this.controlButton.addEventListener("click", ui.pressStop);
-        
-        this.content = document.getElementById("clipboardContent");
-        this.table = document.getElementById("resultTable");
-        
-        this.kalmanCheckbox = document.getElementById("displayKalman");
-        this.kalmanCheckbox.addEventListener("click", ui.toggleKalman);
-        
-        this.snappedToRoad = document.getElementById("snappedToRoad");
-        this.snappedToRoad.addEventListener("click", ui.toggleSnappedToRoad);
-
-        this.copyButton = document.getElementById("copy");
-        this.copyButton.addEventListener("click", ui.copyText);
-
-        this.accuracy = document.getElementById("accuracy");
-        this.accuracy.value = config.maxAllowAccuracy;
-        this.accuracy.addEventListener("change", ui.changeAccuracy);
-
-        this.interval = document.getElementById("interval");
-        this.interval.value = config.timePeriod;
-        this.interval.addEventListener("change", ui.changeInterval);
-        
-    },
-    pressStop: function() {
-        runtime.continueCollect = !runtime.continueCollect;
-        ui.controlButton.innerText = runtime.continueCollect ? "Stop" : "Resume";
-    },
-    toggleKalman: function() {
-        runtime.showKalman = ui.kalmanCheckbox.checked;
-    },
-    copyText: function(){
-        navigator.clipboard.writeText(ui.content.textContent);
-
-    },
-    changeAccuracy: function(){
-        config.maxAllowAccuracy = ui.accuracy.value;
-    },
-    changeInterval: function(){
-        config.timePeriod = ui.interval.value;
-    },
-    toggleSnappedToRoad: function(){
-        runtime.snappedToRoad = ui.snappedToRoad.checked;
+        runtime.KalManFilter = new GPSKalmanFilter( config.KalmanActivity[config.activityType]);
     }
-};
-
-function writeResult(strs) {
-    let html = "";
-    let clipboardString = "";
-    strs.forEach((e,i) => {
-        let text = i == 0 ?
-            //e.getUTCFullYear() + "/" + (e.getUTCMonth() + 1) + "/" + e.getUTCDate() + " " +
-            e.getUTCHours() + ":" + e.getUTCMinutes() + ":" + e.getUTCSeconds()
-            : e;
-        
-        html += "<td>" + text + "</td>";
-        clipboardString += text + "|";
-    });
-    ui.table.insertRow(1).innerHTML = html;
-    ui.content.innerHTML += clipboardString + "\n";
 }
 
 function getLocation() {
@@ -112,7 +55,7 @@ function getLocation() {
 
 function geoSuccess(position) {
     setTimeout(getLocation, config.timePeriod);
-    
+
     if (!runtime.continueCollect)
         return;
 
@@ -134,8 +77,7 @@ function geoSuccess(position) {
 
     if (position.coords.accuracy >= config.maxAllowAccuracy) {
         console.log('skipped');
-    } 
-    else {
+    } else {
         if (makeDecisionAddPoint(config.activityType, distance, position.coords.accuracy, newTime)) {
             let kalManPoint = runtime.KalManFilter.filter(position.coords.latitude, position.coords.longitude, position.coords.accuracy, newTime);
             let newGmapKalManPoint = new google.maps.LatLng(kalManPoint[1], kalManPoint[0]);
@@ -144,7 +86,6 @@ function geoSuccess(position) {
             runtime.workoutKalManCoordinates.push(newGmapKalManPoint);
             runtime.timeSeries.push(newTime);
 
-            //Distances
             let pointArrayLen = runtime.workoutCoordinates.length;
             if (pointArrayLen > 1) {
                 let rawDistance = getDistance(runtime.workoutCoordinates[pointArrayLen - 1], runtime.workoutCoordinates[pointArrayLen - 2]);
@@ -159,7 +100,7 @@ function geoSuccess(position) {
             drawPolyLines();
         }
     }
-    writeResult(output);
+    config.logOutput(output);
 }
 
 function geoError(e) {
@@ -167,11 +108,11 @@ function geoError(e) {
 }
 
 function initMap() {
-    runtime.map = new google.maps.Map(document.getElementById("map"), {
+    runtime.map = new google.maps.Map(document.getElementById(config.mapId), {
         zoom: 17,
         center: {
             lat: 10,
-            lng: 100
+            lng: 10
         },
         mapTypeId: "terrain",
     });
@@ -184,6 +125,7 @@ function initMap() {
         strokeWeight: 4,
     });
     runtime.polylines.setMap(runtime.map);
+    getLocation();
 }
 
 const rad = function(x) {
@@ -216,8 +158,8 @@ function makeDecisionAddPoint(activityType, distance, accuracy, newTime) {
     return distance < maxAllowDistance && distance > minAllowDistance;
 }
 function drawPolyLines(){
-    let points = runtime.showKalman ? runtime.workoutKalManCoordinates: runtime.workoutCoordinates;
-    if(runtime.snappedToRoad) {
+    let points = config.showKalman ? runtime.workoutKalManCoordinates: runtime.workoutCoordinates;
+    if(config.snappedToRoad) {
         runSnapToRoad(points);
     }
     else drawPolyline(points);
@@ -226,7 +168,7 @@ function drawPolyLines(){
 // Snap a user-created polyline to roads and draw the snapped path
 function runSnapToRoad(points) {
     runtime.polylines.setPath(points);
-    
+
     let path = runtime.polylines.getPath();
     let pathValues = [];
     for (let i = 0; i < path.getLength(); i++) {
@@ -261,12 +203,5 @@ function drawPolyline(coordinates) {
 }
 
 window.addEventListener('load', function() {
-    let outputHeader = "DateTime|Lat|Long|Accuracy|Distance|KMLat|KMLong|Sum|KMSum|<br/>\n";
-    runtime.content = document.getElementById("clipboardContent");
-    runtime.content.innerHTML += outputHeader;
-
-    runtime.KalManFilter = new GPSKalmanFilter( config.KalmanActivity[config.activityType]);
-    ui.setup();
-    initMap();
-    getLocation();
+    runtime.run();
 });
