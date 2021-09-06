@@ -16,7 +16,9 @@ Filter out low accuracy data.
 Draw poly line with Google Map. All in js
 
 ## Release
-### v.0.2.1 [4 Sep 21]
+### v0.3.0
+- Refactor TrackGPS as independent class.
+### v.0.2.1
 - Add Google Snap To Road Service.
 
 ### Demo
@@ -36,7 +38,7 @@ Draw poly line with Google Map. All in js
 
 
 ## Usage
-1. Create your Google API key with
+1. Create your Google API key
 2. If you want to use Snap To Road, configure your key to work with Google Road Service. 
 3. Add and config kalMan.js, and trackGPS.js to your page. Configure it
 ```
@@ -51,9 +53,50 @@ snappedToRoad:false,
 outputLog: function(outputs){ui.writeResult(outputs)},//You can change to your preferred function like console.log(outputs.toString())
 KalmanActivity: [0.1, 3, 2, 6, 11] // Kalman decay for each activity type. Change if you know what you're doing.
 ```
-4. DONE!
+4.Add TrackGPS to your code
+```
+trackGPS = new TrackGPS();
+```
+5. Pass position to it
+```
+trackGPS.processPosition(position);
+```
+Sample code to track location and pass it to the lib
+```
+function getLocation() {
+    const options = {
+        enableHighAccuracy: true,
+        timeout: trackGPS.config.timeOutGPS,
+        maximumAge: 0
+    };
 
-*Notes: Console has useful logs, too.
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(geoSuccess, geoError, options);
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+}
+
+function geoSuccess(position) {
+    trackGPS.processPosition(position);
+    setTimeout(getLocation, trackGPS.config.timePeriod);//continous get new location 
+}
+```
+6. DONE!
+
+Notes: Console has useful logs, too.
+## Get Data
+- workoutCoordinates[]: raw GPS value
+- workoutKalManCoordinates[]: GPS value after Kalman Filter
+- snappedCoordinates[]: GPS afer applying Google Road API
+- snappedPlaceIdArray[]: PlaceId after applying Goole Road Service.,
+
+## Credit
+<https://www.wouterbulten.nl/blog/tech/lightweight-javascript-library-for-noise-filtering/>
+Kalman lib ported by Ported by John Stowell (nzjs)
+
+
+
 <div>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-WKJ3KCZFJV"></script>
 <script>
