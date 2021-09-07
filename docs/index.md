@@ -54,14 +54,18 @@ outputLog: function(outputs){ui.writeResult(outputs)},//You can change to your p
 KalmanActivity: [0.1, 3, 2, 6, 11] // Kalman decay for each activity type. Change if you know what you're doing.
 ```
 4.Add TrackGPS to your code
+
 ```
 trackGPS = new TrackGPS();
 ```
 5. Pass position to it
+
 ```
 trackGPS.processPosition(position);
 ```
+
 Sample code to track location and pass it to the lib
+
 ```
 function getLocation() {
     const options = {
@@ -82,14 +86,17 @@ function geoSuccess(position) {
     setTimeout(getLocation, trackGPS.config.timePeriod);//continous get new location 
 }
 ```
+
 6. DONE!
 
-Notes: Console has useful logs, too.
+Note: Console has useful logs, too.
 ## Get Data
-- workoutCoordinates[]: raw GPS value
-- workoutKalManCoordinates[]: GPS value after Kalman Filter
-- snappedCoordinates[]: GPS afer applying Google Road API
-- snappedPlaceIdArray[]: PlaceId after applying Goole Road Service.,
+- workoutCoordinates[]: raw GPS value.
+- workoutKalManCoordinates[]: GPS value after Kalman Filter.
+- sumDistance: total raw distance.
+- sumKMDistance: total distance after Kalman filter.
+- snappedCoordinates[]: GPS value after applying Google Road API.
+- snappedPlaceIdArray[]: PlaceId after applying Google Road API.
 
 ## Credit
 <https://www.wouterbulten.nl/blog/tech/lightweight-javascript-library-for-noise-filtering/>
