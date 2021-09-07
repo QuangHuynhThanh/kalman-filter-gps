@@ -9,7 +9,7 @@ class TrackGPS {
             showKalman: false,
             snappedToRoad: false,
             logOutput: function (outputs) {
-                console.log(outputs.toString());
+                ui.writeResult(outputs);
             },//you can change to your preferred function like console.log(outputs.toString())
             KalmanActivity: [0.1, 3, 2, 6, 11]
         };

@@ -32,7 +32,7 @@ Draw poly line with Google Map. All in js
 <img src="./images/GoogleSnapToRoad.jpg" alt="Kalman Filter" class="inline"/>
 
 #### Live Sample
-<https://qrco.de/gps-loc>
+<https://quanghuynhthanh.github.io/kalman-filter-gps/demo.html>
 
 <img src="./images/gps-km-qr.png" style="width:20%" alt="QR code" class="inline"/>
 
@@ -91,6 +91,8 @@ function geoSuccess(position) {
 
 Note: Console has useful logs, too.
 ## Get Data
+
+You can get data from GPSKalman.runtime:
 - workoutCoordinates[]: raw GPS value.
 - workoutKalManCoordinates[]: GPS value after Kalman Filter.
 - sumDistance: total raw distance.
